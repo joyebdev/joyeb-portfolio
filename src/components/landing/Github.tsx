@@ -51,24 +51,24 @@ export default function Github() {
   const [viewportWidth, setViewportWidth] = useState(1024);
   const { theme } = useTheme();
 
-  const isCompactScreen = viewportWidth < 640;
-  const isVerySmallScreen = viewportWidth < 420;
+  const isCompactScreen = viewportWidth < 768;
+  const isVerySmallScreen = viewportWidth < 390;
   const calendarBlockSize = isVerySmallScreen
-    ? 5
-    : isCompactScreen
-      ? 7
-      : githubConfig.blockSize;
-  const calendarBlockMargin = isVerySmallScreen
-    ? 1
-    : isCompactScreen
-      ? 2
-      : githubConfig.blockMargin;
-  const calendarFontSize = isVerySmallScreen
     ? 8
     : isCompactScreen
       ? 10
+      : githubConfig.blockSize;
+  const calendarBlockMargin = isVerySmallScreen
+    ? 2
+    : isCompactScreen
+      ? 3
+      : githubConfig.blockMargin;
+  const calendarFontSize = isVerySmallScreen
+    ? 10
+    : isCompactScreen
+      ? 11
       : githubConfig.fontSize;
-  const compactWeekdays = isCompactScreen
+  const compactWeekdays = isVerySmallScreen
     ? ['', '', '', '', '', '', '']
     : githubConfig.weekdays;
 
@@ -209,7 +209,7 @@ export default function Github() {
         ) : (
           <div className="w-full">
             <div className="overflow-x-auto pb-2">
-              <div className="mx-auto w-fit max-w-full rounded-xl border border-border p-2 sm:p-5">
+              <div className="mx-auto inline-flex min-w-max rounded-xl border border-border p-3 sm:p-5">
                 <ActivityCalendar
                   data={contributions}
                   blockSize={calendarBlockSize}
@@ -218,8 +218,8 @@ export default function Github() {
                   colorScheme={theme === 'dark' ? 'dark' : 'light'}
                   maxLevel={githubConfig.maxLevel}
                   hideTotalCount={true}
-                  hideColorLegend={isCompactScreen}
-                  hideMonthLabels={isCompactScreen}
+                  hideColorLegend={isVerySmallScreen}
+                  hideMonthLabels={isVerySmallScreen}
                   theme={githubConfig.theme}
                   labels={{
                     months: githubConfig.months,
@@ -227,9 +227,7 @@ export default function Github() {
                     totalCount: githubConfig.totalCountLabel,
                   }}
                   style={{
-                    width: '100%',
-                    maxWidth: '100%',
-                    display: 'block',
+                    display: 'inline-block',
                     color: 'rgb(139, 148, 158)',
                   }}
                 />
