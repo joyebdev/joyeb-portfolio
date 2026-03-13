@@ -31,7 +31,7 @@ export const BlogComponents = {
     children: React.ReactNode;
     [key: string]: unknown;
   }) => (
-    <h1 className="mb-6 text-4xl font-bold" {...props}>
+    <h1 className="mb-5 text-2xl font-bold sm:mb-6 sm:text-3xl lg:text-4xl" {...props}>
       {children}
     </h1>
   ),
@@ -42,7 +42,7 @@ export const BlogComponents = {
     children: React.ReactNode;
     [key: string]: unknown;
   }) => (
-    <h2 className="mt-8 mb-4 text-3xl font-semibold" {...props}>
+    <h2 className="mt-7 mb-3 text-xl font-semibold sm:mt-8 sm:mb-4 sm:text-2xl lg:text-3xl" {...props}>
       {children}
     </h2>
   ),
@@ -53,7 +53,7 @@ export const BlogComponents = {
     children: React.ReactNode;
     [key: string]: unknown;
   }) => (
-    <h3 className="mt-6 mb-3 text-2xl font-medium" {...props}>
+    <h3 className="mt-6 mb-3 text-lg font-medium sm:text-xl lg:text-2xl" {...props}>
       {children}
     </h3>
   ),
@@ -65,7 +65,7 @@ export const BlogComponents = {
     children: React.ReactNode;
     [key: string]: unknown;
   }) => (
-    <p className="text-muted-foreground mb-4 leading-7" {...props}>
+    <p className="text-muted-foreground mb-4 text-sm leading-7 sm:text-base" {...props}>
       {children}
     </p>
   ),
@@ -77,7 +77,7 @@ export const BlogComponents = {
     children: React.ReactNode;
     [key: string]: unknown;
   }) => (
-    <ul className="mb-4 ml-6 list-disc space-y-2" {...props}>
+    <ul className="mb-4 ml-4 list-disc space-y-2 sm:ml-6" {...props}>
       {children}
     </ul>
   ),
@@ -88,7 +88,7 @@ export const BlogComponents = {
     children: React.ReactNode;
     [key: string]: unknown;
   }) => (
-    <ol className="mb-4 ml-6 list-decimal space-y-2" {...props}>
+    <ol className="mb-4 ml-4 list-decimal space-y-2 sm:ml-6" {...props}>
       {children}
     </ol>
   ),
@@ -137,7 +137,7 @@ export const BlogComponents = {
     return (
       <div className="group relative mb-4">
         <pre
-          className="bg-muted/30 overflow-x-auto rounded-lg border p-4 text-sm [&>code]:bg-transparent [&>code]:p-0"
+          className="bg-muted/30 overflow-x-auto rounded-lg border p-3 text-xs sm:p-4 sm:text-sm [&>code]:bg-transparent [&>code]:p-0"
           {...props}
         >
           {children}
@@ -167,7 +167,7 @@ export const BlogComponents = {
 
     // Inline code styling
     return (
-      <code className="rounded px-2 py-1 font-mono text-sm" {...props}>
+      <code className="rounded px-1.5 py-0.5 font-mono text-xs sm:px-2 sm:py-1 sm:text-sm" {...props}>
         {children}
       </code>
     );

@@ -118,7 +118,7 @@ export default function FontSizeControls() {
                     variant="outline"
                     size="lg"
                     onClick={handleReset}
-                    className="hover:bg-accent h-12 px-4 font-mono text-sm whitespace-nowrap"
+                    className="hover:bg-accent h-11 px-3 font-mono text-xs sm:h-12 sm:px-4 sm:text-sm"
                     aria-label="Reset font size"
                   >
                     Reset
@@ -177,7 +177,7 @@ export default function FontSizeControls() {
                 variant="ghost"
                 size="sm"
                 onClick={handleReset}
-                className="hover:bg-accent h-10 px-1 font-mono text-xs whitespace-nowrap"
+                className="hover:bg-accent h-9 px-2 font-mono text-xs"
                 aria-label="Reset font size"
               >
                 {fontSize}px

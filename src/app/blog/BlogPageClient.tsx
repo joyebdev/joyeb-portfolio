@@ -88,14 +88,14 @@ export function BlogPageClient({
   };
 
   return (
-    <Container className="py-16">
+    <Container className="py-12 sm:py-16">
       <div className="space-y-8">
         {/* Header */}
         <div className="space-y-4 text-center">
-          <h1 className="text-4xl font-bold tracking-tight lg:text-5xl">
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
             Blogs
           </h1>
-          <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
+          <p className="text-muted-foreground mx-auto max-w-2xl text-base sm:text-lg">
             Thoughts, tutorials, and insights on engineering, and programming.
           </p>
         </div>
@@ -105,7 +105,7 @@ export function BlogPageClient({
         {/* Tags */}
         {initialTags.length > 0 && (
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="text-lg font-semibold">Popular Tags</h2>
               {selectedTag && (
                 <button
@@ -141,8 +141,8 @@ export function BlogPageClient({
 
         {/* Blog Posts */}
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-xl leading-tight font-semibold sm:text-2xl">
               {selectedTag ? `Posts tagged "${selectedTag}"` : 'Latest Posts'}
               {filteredPosts.length > 0 && (
                 <span className="text-muted-foreground ml-2 text-sm font-normal">

@@ -36,7 +36,7 @@ export function BlogContent({ frontmatter, content }: BlogContentProps) {
   return (
     <article className="mx-auto max-w-4xl">
       {/* Hero Section */}
-      <header className="mb-8 space-y-6">
+      <header className="mb-8 space-y-5 sm:space-y-6">
         {image && (
           <div className="relative aspect-video overflow-hidden rounded-lg">
             <Image
@@ -60,14 +60,16 @@ export function BlogContent({ frontmatter, content }: BlogContentProps) {
             </div>
           )}
 
-          <h1 className="text-4xl leading-tight font-bold lg:text-5xl">
+          <h1 className="text-2xl leading-tight font-bold sm:text-3xl md:text-4xl lg:text-5xl">
             {title}
           </h1>
 
-          <p className="text-muted-foreground text-xl">{description}</p>
+          <p className="text-muted-foreground text-base sm:text-lg md:text-xl">
+            {description}
+          </p>
 
           <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
-            <Calender className="size-6" />
+            <Calender className="size-4 sm:size-5" />
             <time dateTime={date}>{formattedDate}</time>
             {readTime && <span className="w-1 h-1 rounded-full bg-muted-foreground/40" />}
             {readTime && <span>{readTime}</span>}
@@ -80,7 +82,7 @@ export function BlogContent({ frontmatter, content }: BlogContentProps) {
       </header>
 
       {/* Content */}
-      <div className="prose prose-neutral dark:prose-invert max-w-none">
+      <div className="prose prose-sm prose-neutral max-w-none sm:prose-base dark:prose-invert">
         <MDXRemote
           source={content}
           components={BlogComponents}

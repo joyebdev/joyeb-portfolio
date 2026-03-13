@@ -24,10 +24,10 @@ export function BlogCard({ post, index }: BlogCardProps) {
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className="group flex flex-col justify-between rounded-2xl border border-border bg-card p-6 hover:border-border/60 transition-all duration-200 min-h-[200px]"
+      className="group flex min-h-[170px] flex-col justify-between rounded-2xl border border-border bg-card p-4 transition-all duration-200 hover:border-border/60 sm:min-h-[200px] sm:p-6"
     >
       <div className="flex flex-col gap-3">
-        <span className="text-5xl font-bold text-muted-foreground/20 leading-none select-none">
+        <span className="text-4xl leading-none font-bold text-muted-foreground/20 select-none sm:text-5xl">
           {String(index + 1).padStart(2, '0')}
         </span>
 
@@ -48,8 +48,8 @@ export function BlogCard({ post, index }: BlogCardProps) {
         )}
       </div>
 
-      <div className="flex items-center justify-between border-t border-border pt-4 mt-4">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground/70">
+      <div className="mt-4 flex flex-col gap-2 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground/70">
           {publishedDate && (
             <span>
               {new Date(publishedDate).toLocaleDateString('en-US', {
@@ -65,7 +65,7 @@ export function BlogCard({ post, index }: BlogCardProps) {
           {readingTime && <span>{readingTime}</span>}
         </div>
 
-        <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground flex items-center gap-1 transition-colors duration-150">
+        <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground inline-flex items-center gap-1 transition-colors duration-150 sm:self-auto">
           Read
           <svg
             width="11"

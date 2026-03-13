@@ -119,19 +119,19 @@ export default function Github() {
   }, []);
 
   return (
-    <Container className="mt-20">
+    <Container className="mt-16 md:mt-20">
       <div className="w-full overflow-hidden space-y-6">
         {/* Header */}
         <div className="flex justify-center">
           <div className="text-center">
-            <h2 className="text-foreground text-3xl font-bold">
+            <h2 className="text-foreground text-2xl font-bold sm:text-3xl">
               {githubConfig.title}
             </h2>
-            <p className="text-muted-foreground text-base">
+            <p className="text-muted-foreground text-sm sm:text-base">
               <b>{githubConfig.username}</b>&apos;s {githubConfig.subtitle}
             </p>
             {!isLoading && !hasError && totalContributions > 0 && (
-              <p className="text-base text-muted-foreground mt-1">
+              <p className="text-muted-foreground mt-1 text-sm sm:text-base">
                 Total:{' '}
                 <span className="font-black">
                   {totalContributions.toLocaleString()}
@@ -172,31 +172,33 @@ export default function Github() {
             </Button>
           </div>
         ) : (
-          <div className="w-full flex justify-center">
-            <div className="inline-block w-fit rounded-xl border border-border p-5">
-              <ActivityCalendar
-                data={contributions}
-                blockSize={13}
-                blockMargin={4}
-                fontSize={12}
-                colorScheme={theme === 'dark' ? 'dark' : 'light'}
-                maxLevel={githubConfig.maxLevel}
-                hideTotalCount={true}
-                hideColorLegend={false}
-                hideMonthLabels={false}
-                theme={githubConfig.theme}
-                labels={{
-                  months: githubConfig.months,
-                  weekdays: githubConfig.weekdays,
-                  totalCount: githubConfig.totalCountLabel,
-                }}
-                style={{
-                  width: '100%',
-                  maxWidth: '100%',
-                  display: 'block',
-                  color: 'rgb(139, 148, 158)',
-                }}
-              />
+          <div className="w-full">
+            <div className="overflow-x-auto pb-2">
+              <div className="inline-block min-w-[720px] rounded-xl border border-border p-3 sm:p-5">
+                <ActivityCalendar
+                  data={contributions}
+                  blockSize={10}
+                  blockMargin={3}
+                  fontSize={11}
+                  colorScheme={theme === 'dark' ? 'dark' : 'light'}
+                  maxLevel={githubConfig.maxLevel}
+                  hideTotalCount={true}
+                  hideColorLegend={false}
+                  hideMonthLabels={false}
+                  theme={githubConfig.theme}
+                  labels={{
+                    months: githubConfig.months,
+                    weekdays: githubConfig.weekdays,
+                    totalCount: githubConfig.totalCountLabel,
+                  }}
+                  style={{
+                    width: '100%',
+                    maxWidth: '100%',
+                    display: 'block',
+                    color: 'rgb(139, 148, 158)',
+                  }}
+                />
+              </div>
             </div>
           </div>
         )}

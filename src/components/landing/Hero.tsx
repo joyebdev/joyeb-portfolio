@@ -59,18 +59,18 @@ export default function Hero() {
       />
 
       {/* Text Area */}
-      <div className="mt-8 flex flex-col gap-2">
-        <h1 className="text-4xl font-bold">
+      <div className="mt-6 flex flex-col gap-3 sm:mt-8">
+        <h1 className="text-3xl leading-tight font-bold sm:text-4xl md:text-5xl">
           Hi, I&apos;m {name} — <span className="text-secondary">{title}</span>
         </h1>
 
-        <div className="mt-4 flex flex-wrap items-center gap-x-1.5 gap-y-2 text-base whitespace-pre-wrap text-neutral-500 md:text-lg">
+        <div className="mt-3 flex flex-wrap items-center gap-x-1.5 gap-y-2 whitespace-pre-wrap text-sm text-neutral-500 sm:text-base md:text-lg">
           {renderDescription()}
         </div>
       </div>
 
       {/* Buttons */}
-      <div className="mt-8 flex gap-4">
+      <div className="mt-6 flex flex-wrap gap-3 sm:mt-8 sm:gap-4">
         {buttons.map((button, index) => {
           const IconComponent =
             buttonIcons[button.icon as keyof typeof buttonIcons];

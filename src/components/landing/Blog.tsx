@@ -11,9 +11,9 @@ export default function Blog() {
 
   return (
     <section id="blogs">
-      <Container className="mt-20">
+      <Container className="mt-16 md:mt-20">
         <SectionHeading subHeading="Featured" heading="Blogs" />
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3">
           {posts.map((post, index) => (
             <BlogCard
               key={post.slug}
@@ -23,7 +23,7 @@ export default function Blog() {
           ))}
         </div>
         <div className="mt-8 flex justify-center">
-          <Button variant="outline">
+          <Button variant="outline" className="w-full sm:w-auto">
             <Link href="/#blogs">Show all blogs</Link>
           </Button>
         </div>
