@@ -7,6 +7,7 @@ const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 
 const RATE_LIMIT_WINDOW = 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 5;
+const GEMINI_MODELS = ['gemini-2.0-flash', 'gemini-1.5-flash'] as const;
 
 const chatSchema = z.object({
   message: z.string().min(1).max(2000),
@@ -106,6 +107,93 @@ function checkRateLimit(clientIP: string): {
   };
 }
 
+function extractGeminiErrorMessage(payload: unknown): string | null {
+  if (!payload || typeof payload !== 'object') {
+    return null;
+  }
+
+  const error = (payload as { error?: unknown }).error;
+
+  if (!error || typeof error !== 'object') {
+    return null;
+  }
+
+  const message = (error as { message?: unknown }).message;
+  return typeof message === 'string' ? message : null;
+}
+
+type GeminiResult =
+  | {
+      ok: true;
+      response: Response;
+    }
+  | {
+      ok: false;
+      status: number;
+      userMessage: string;
+      retryAfter?: string;
+    };
+
+async function requestGemini(
+  apiKey: string,
+  requestBody: unknown,
+): Promise<GeminiResult> {
+  for (const [index, model] of GEMINI_MODELS.entries()) {
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`;
+
+    const response = await fetch(geminiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (response.ok) {
+      return { ok: true, response };
+    }
+
+    let providerMessage: string | null = null;
+    try {
+      const errorPayload = await response.json();
+      providerMessage = extractGeminiErrorMessage(errorPayload);
+    } catch {
+      providerMessage = null;
+    }
+
+    const isRateLimited = response.status === 429;
+    const isLastModel = index === GEMINI_MODELS.length - 1;
+
+    if (isRateLimited && !isLastModel) {
+      continue;
+    }
+
+    if (isRateLimited) {
+      return {
+        ok: false,
+        status: 429,
+        userMessage:
+          'AI service is currently rate-limited. Please wait a minute and try again.',
+        retryAfter: response.headers.get('retry-after') ?? undefined,
+      };
+    }
+
+    return {
+      ok: false,
+      status: response.status,
+      userMessage:
+        providerMessage || 'AI service request failed. Please try again later.',
+    };
+  }
+
+  return {
+    ok: false,
+    status: 429,
+    userMessage:
+      'AI service is currently rate-limited. Please wait a minute and try again.',
+  };
+}
+
 export async function POST(request: NextRequest) {
   try {
     const clientIP = getClientIP(request);
@@ -175,19 +263,27 @@ export async function POST(request: NextRequest) {
       },
     };
 
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=${apiKey}`;
+    const geminiResult = await requestGemini(apiKey, requestBody);
 
-    const response = await fetch(geminiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Gemini API error: ${response.status}`);
+    if (!geminiResult.ok) {
+      return NextResponse.json(
+        {
+          error: geminiResult.userMessage,
+        },
+        {
+          status: geminiResult.status,
+          headers: {
+            ...(geminiResult.retryAfter
+              ? { 'Retry-After': geminiResult.retryAfter }
+              : {}),
+            'X-RateLimit-Limit': RATE_LIMIT_MAX_REQUESTS.toString(),
+            'X-RateLimit-Remaining': rateLimit.remaining.toString(),
+          },
+        },
+      );
     }
+
+    const response = geminiResult.response;
 
     const encoder = new TextEncoder();
 

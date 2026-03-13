@@ -182,7 +182,18 @@ const ChatBubble: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        let errorMessage = `HTTP error! status: ${response.status}`;
+
+        try {
+          const errorData = await response.json();
+          if (typeof errorData?.error === 'string' && errorData.error) {
+            errorMessage = errorData.error;
+          }
+        } catch {
+          // Keep default error text if response body is not JSON.
+        }
+
+        throw new Error(errorMessage);
       }
 
       const reader = response.body?.getReader();
@@ -244,12 +255,17 @@ const ChatBubble: React.FC = () => {
     } catch (error) {
       console.error('Error sending message:', error);
 
+      const fallbackError =
+        "I'm sorry, I'm having trouble responding right now. Please try again later.";
+      const userFacingError =
+        error instanceof Error && error.message ? error.message : fallbackError;
+
       setMessages((prev) =>
         prev.map((msg) =>
           msg.id === botMessageId
             ? {
                 ...msg,
-                text: "I'm sorry, I'm having trouble responding right now. Please try again later.",
+                text: userFacingError,
                 isStreaming: false,
               }
             : msg,
