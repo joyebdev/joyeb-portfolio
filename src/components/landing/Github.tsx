@@ -365,7 +365,9 @@ export default function Github() {
         <div className="text-center">
           <p className="text-sm text-muted-foreground">Activity</p>
           <div className="mt-1 inline-flex items-center gap-2">
-            <h2 className="text-2xl font-bold text-foreground">GitHub Contributions</h2>
+            <h2 className="text-2xl font-bold text-foreground sm:text-3xl md:text-4xl lg:text-5xl">
+              GitHub Contributions
+            </h2>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-green-500/20 bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-500">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-500" />
               Live
@@ -375,7 +377,7 @@ export default function Github() {
             href="https://github.com/joyeb-kothiya29"
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-2 inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            className="mt-2 inline-flex min-h-11 items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             <GithubIcon className="h-3.5 w-3.5" />
             @joyeb-kothiya29

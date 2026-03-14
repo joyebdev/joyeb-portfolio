@@ -73,7 +73,7 @@ const ChatBubble: React.FC = () => {
     }
   }, [messages]);
 
-  const handleSendMessage = async () => {
+  const handleSendMessage = async (): Promise<void> => {
     if (!newMessage.trim() || isLoading) return;
 
     // Trigger haptic feedback on mobile devices
@@ -115,14 +115,14 @@ const ChatBubble: React.FC = () => {
     await sendMessage(messageText, botMessageId);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSendMessage();
+      void handleSendMessage();
     }
   };
 
-  const handleSuggestionClick = (suggestion: string) => {
+  const handleSuggestionClick = (suggestion: string): void => {
     // Trigger haptic feedback on mobile devices
     if (isMobile()) {
       triggerHaptic('selection');
@@ -159,10 +159,13 @@ const ChatBubble: React.FC = () => {
     setMessages((prev) => [...prev, botMessage]);
 
     // Send the message (reuse the same logic as handleSendMessage)
-    sendMessage(suggestion, botMessageId);
+    void sendMessage(suggestion, botMessageId);
   };
 
-  const sendMessage = async (messageText: string, botMessageId: number) => {
+  const sendMessage = async (
+    messageText: string,
+    botMessageId: number,
+  ): Promise<void> => {
     try {
       // Prepare conversation history for Gemini API format
       const history = messages.slice(-10).map((msg) => ({
@@ -279,7 +282,7 @@ const ChatBubble: React.FC = () => {
 
   return (
     <ExpandableChat
-      className="mt-4 ml-4 max-h-[95vh] max-w-[calc(100vw-2rem)] hover:cursor-pointer sm:max-w-[calc(100vw-4rem)] md:max-w-xl"
+      className="max-h-[90vh] w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] hover:cursor-pointer sm:max-w-[calc(100vw-3rem)] md:max-w-xl"
       position="bottom-right"
       size="lg"
       icon={<ChatBubbleIcon className="h-6 w-6" />}
@@ -395,7 +398,7 @@ const ChatBubble: React.FC = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => handleSuggestionClick(suggestion)}
-                      className="bg-background hover:bg-muted border-muted-foreground/20 h-8 px-3 text-xs"
+                      className="bg-background hover:bg-muted border-muted-foreground/20 min-h-11 px-3 text-xs"
                     >
                       {suggestion}
                     </Button>
@@ -413,7 +416,7 @@ const ChatBubble: React.FC = () => {
             placeholder="Ask me about my work and experience..."
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyDown}
             disabled={isLoading}
             className="flex-1"
           />
@@ -421,6 +424,7 @@ const ChatBubble: React.FC = () => {
             size="sm"
             onClick={handleSendMessage}
             disabled={!newMessage.trim() || isLoading}
+            className="size-11"
           >
             {isLoading ? (
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />

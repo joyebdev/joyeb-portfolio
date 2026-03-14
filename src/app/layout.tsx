@@ -1,9 +1,8 @@
 import UmamiAnalytics from '@/components/analytics/UmamiAnalytics';
-import ChatBubble from '@/components/common/ChatBubble';
+import ClientOverlays from '@/components/common/ClientOverlays';
 import Footer from '@/components/common/Footer';
 import Navbar from '@/components/common/Navbar';
 import DynamicFavicon from '@/components/common/DynamicFavicon';
-import OnekoCat from '@/components/common/OnekoCat';
 import { ThemeProvider } from '@/components/common/ThemeProviders';
 import { generateMetadata as getMetadata } from '@/config/Meta';
 import { lenisOptions } from '@/lib/lenis';
@@ -41,9 +40,8 @@ export default function RootLayout({
               <DynamicFavicon />
               <Navbar />
               {children}
-              <OnekoCat />
+              <ClientOverlays />
               <Footer />
-              <ChatBubble />
               <UmamiAnalytics />
             </ReactLenis>
           </ThemeProvider>

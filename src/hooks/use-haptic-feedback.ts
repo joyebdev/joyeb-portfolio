@@ -70,9 +70,8 @@ export const useHapticFeedback = () => {
         oscillator.start(audioContext.currentTime);
         oscillator.stop(audioContext.currentTime + 0.02);
       }
-    } catch (error) {
+    } catch {
       // Silently fail if haptic feedback is not supported
-      console.debug('Haptic feedback not supported:', error);
     }
   }, []);
 

@@ -32,20 +32,16 @@ export const useThemeToggle = ({
   const updateStyles = useCallback((css: string, name: string) => {
     if (typeof window === 'undefined') return;
 
-    let styleElement = document.getElementById(styleId) as HTMLStyleElement;
+    let styleElement = document.getElementById(styleId);
 
-    console.log('style ELement', styleElement);
-    console.log('name', name);
-
-    if (!styleElement) {
+    if (!(styleElement instanceof HTMLStyleElement)) {
       styleElement = document.createElement('style');
       styleElement.id = styleId;
       document.head.appendChild(styleElement);
     }
 
+    styleElement.dataset.animationName = name;
     styleElement.textContent = css;
-
-    console.log('content updated');
   }, []);
 
   const toggleTheme = useCallback(() => {

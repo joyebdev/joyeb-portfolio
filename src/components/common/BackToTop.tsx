@@ -10,7 +10,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 export default function BackToTop() {
   const { triggerHaptic, isMobile } = useHapticFeedback();
 
-  const handleClick = () => {
+  const handleClick = (): void => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     // Trigger haptic feedback on mobile devices
@@ -25,7 +25,7 @@ export default function BackToTop() {
         <Button
           variant="outline"
           size="icon"
-          className="fixed right-10 bottom-4 z-50 bg-white hover:cursor-pointer md:right-20 dark:bg-black"
+          className="fixed right-4 bottom-4 z-50 size-11 bg-white hover:cursor-pointer md:right-8 dark:bg-black"
           onClick={handleClick}
         >
           <ArrowUp className="size-4" />

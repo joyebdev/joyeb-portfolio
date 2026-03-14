@@ -11,7 +11,7 @@ import {
 } from 'motion/react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRef } from 'react';
+import { memo, useRef } from 'react';
 
 type FeedMode = 'homepage' | 'page';
 
@@ -49,7 +49,7 @@ const projectCards: ProjectCardData[] = projects.map((project, index) => {
   };
 });
 
-function ActionButton({
+const ActionButton = memo(function ActionButton({
   href,
   icon,
   label,
@@ -57,9 +57,9 @@ function ActionButton({
   href: string;
   icon: React.ReactNode;
   label: string;
-}) {
+}): React.JSX.Element {
   const baseClassName =
-    'flex-1 flex items-center justify-center gap-2 rounded-lg border border-white/20 px-4 py-2.5 text-sm text-white transition-all duration-200';
+    'flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-lg border border-white/20 px-4 py-2.5 text-sm text-white transition-all duration-200';
 
   if (!href) {
     return (
@@ -81,9 +81,9 @@ function ActionButton({
       <span>{label}</span>
     </a>
   );
-}
+});
 
-function ProjectCard({
+const ProjectCard = memo(function ProjectCard({
   title,
   description,
   category,
@@ -91,7 +91,7 @@ function ProjectCard({
   liveUrl,
   githubUrl,
   technologies,
-}: ProjectCardData) {
+}: ProjectCardData): React.JSX.Element {
   const cardRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({
@@ -220,7 +220,10 @@ function ProjectCard({
       </motion.div>
     </div>
   );
-}
+});
+
+ActionButton.displayName = 'ActionButton';
+ProjectCard.displayName = 'ProjectCard';
 
 function StackedProjectCard({
   project,
@@ -303,7 +306,7 @@ function ProjectCardList({
   }
 
   return (
-    <div className="relative mx-auto w-full overflow-visible rounded-[1.75rem] border border-transparent px-1 pb-10 pt-8 sm:px-2 sm:pb-12 sm:pt-10">
+    <div className="relative mx-auto min-h-[80vh] w-full overflow-visible rounded-[1.75rem] border border-transparent px-1 pb-10 pt-8 sm:px-2 sm:pb-12 sm:pt-10 lg:min-h-[85vh]">
       {items.map((project, index) => (
         <StackedProjectCard
           key={project.number}
@@ -325,10 +328,10 @@ export function ProjectsVerticalFeed({ mode }: { mode: FeedMode }) {
       <section className="min-h-screen bg-[#0D0D0D] px-4 pb-12 pt-20 sm:px-6">
         <div className="mx-auto max-w-7xl">
           <div className="mb-16 space-y-4">
-            <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
+            <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl md:text-4xl lg:text-5xl">
               Featured Projects
             </h1>
-            <p className="max-w-2xl text-base text-white/60 sm:text-lg">
+            <p className="max-w-2xl text-sm text-white/60 sm:text-base md:text-lg">
               A collection of professional web development projects showcasing modern
               design and full-stack capabilities.
             </p>
@@ -343,9 +346,11 @@ export function ProjectsVerticalFeed({ mode }: { mode: FeedMode }) {
   return (
     <section id="projects" className="mt-20 space-y-8">
       <div className="space-y-3 text-center">
-        <h2 className="text-4xl font-bold tracking-tight sm:text-5xl">My Works</h2>
+        <h2 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl lg:text-5xl">
+          My Works
+        </h2>
         <p className="text-base font-medium text-secondary sm:text-lg">Featured Work</p>
-        <p className="mx-auto max-w-2xl text-lg text-muted-foreground sm:text-xl">
+        <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-base md:text-lg lg:text-xl">
           Custom websites and apps crafted for real businesses, each focused on fast
           performance, clean user flows, and modern visual storytelling.
         </p>
@@ -356,7 +361,7 @@ export function ProjectsVerticalFeed({ mode }: { mode: FeedMode }) {
       <div className="flex justify-center">
         <Link
           href="/projects"
-          className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm transition-colors hover:bg-muted"
+          className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border px-4 py-2 text-sm transition-colors hover:bg-muted"
         >
           View all projects
           <ExternalLink className="h-4 w-4" />

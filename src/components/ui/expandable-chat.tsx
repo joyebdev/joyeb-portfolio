@@ -18,8 +18,8 @@ const chatConfig = {
     full: 'sm:w-full sm:h-full',
   },
   positions: {
-    'bottom-right': 'bottom-5 right-5',
-    'bottom-left': 'bottom-5 left-5',
+    'bottom-right': 'bottom-3 right-3 sm:bottom-5 sm:right-5',
+    'bottom-left': 'bottom-3 left-3 sm:bottom-5 sm:left-5',
   },
   chatPositions: {
     'bottom-right': 'sm:bottom-[calc(100%+10px)] sm:right-0',
@@ -49,7 +49,7 @@ const ExpandableChat: React.FC<ExpandableChatProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
 
-  const toggleChat = () => setIsOpen(!isOpen);
+  const toggleChat = (): void => setIsOpen(!isOpen);
 
   return (
     <div
@@ -73,7 +73,7 @@ const ExpandableChat: React.FC<ExpandableChatProps> = ({
         <Button
           variant="ghost"
           size="icon"
-          className="absolute top-2 right-2 sm:hidden"
+          className="absolute top-2 right-2 size-11 sm:hidden"
           onClick={toggleChat}
         >
           <X className="h-4 w-4" />
@@ -105,7 +105,7 @@ ExpandableChatHeader.displayName = 'ExpandableChatHeader';
 const ExpandableChatBody: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
   className,
   ...props
-}) => <div className={cn('flex-grow overflow-y-auto', className)} {...props} />;
+}) => <div className={cn('grow overflow-y-auto', className)} {...props} />;
 
 ExpandableChatBody.displayName = 'ExpandableChatBody';
 

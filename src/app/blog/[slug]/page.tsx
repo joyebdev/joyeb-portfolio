@@ -77,7 +77,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
   return (
     <>
-      <Container className="py-16">
+      <Container className="py-12 sm:py-16">
         <div className="space-y-12">
           {/* Back Button */}
           <div>
@@ -97,7 +97,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             <div className="space-y-6">
               <Separator />
               <div className="space-y-6">
-                <h2 className="text-2xl font-semibold">Related Posts</h2>
+                <h2 className="text-2xl font-semibold sm:text-3xl md:text-4xl lg:text-5xl">
+                  Related Posts
+                </h2>
                 <BlogList posts={relatedPosts} />
               </div>
             </div>

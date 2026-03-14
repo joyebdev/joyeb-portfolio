@@ -1,20 +1,13 @@
 'use client';
 
 import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 export default function DynamicFavicon() {
   const { resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  // Wait until component is fully mounted on client
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
-    // Do nothing until mounted and theme is resolved
-    if (!mounted || !resolvedTheme) return;
+    if (!resolvedTheme) return;
 
     // Safety check - ensure we are in browser
     if (typeof document === 'undefined') return;
@@ -67,7 +60,7 @@ export default function DynamicFavicon() {
       // Silently fail - favicon switching is non-critical
       console.warn('DynamicFavicon: could not update favicon', error);
     }
-  }, [resolvedTheme, mounted]);
+  }, [resolvedTheme]);
 
   // Render nothing - this is a head manipulation component
   return null;

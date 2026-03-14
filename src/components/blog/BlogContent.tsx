@@ -43,6 +43,7 @@ export function BlogContent({ frontmatter, content }: BlogContentProps) {
               src={image}
               alt={title}
               fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1024px"
               className="object-cover"
               priority
             />

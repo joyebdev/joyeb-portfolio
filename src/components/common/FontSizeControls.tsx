@@ -14,18 +14,24 @@ import {
 } from '../ui/drawer';
 
 export default function FontSizeControls() {
-  const [fontSize, setFontSize] = useState<number>(16);
-  const { triggerHaptic, isMobile } = useHapticFeedback();
-
-  // Load font size from localStorage on mount
-  useEffect(() => {
-    const savedFontSize = localStorage.getItem('blog-font-size');
-    if (savedFontSize) {
-      const size = parseInt(savedFontSize, 10);
-      setFontSize(size);
-      applyFontSize(size);
+  const [fontSize, setFontSize] = useState<number>(() => {
+    if (typeof window === 'undefined') {
+      return 16;
     }
-  }, []);
+
+    const savedFontSize = localStorage.getItem('blog-font-size');
+    if (!savedFontSize) {
+      return 16;
+    }
+
+    const parsed = Number.parseInt(savedFontSize, 10);
+    if (Number.isNaN(parsed)) {
+      return 16;
+    }
+
+    return Math.max(12, Math.min(24, parsed));
+  });
+  const { triggerHaptic, isMobile } = useHapticFeedback();
 
   // Apply font size to the document
   const applyFontSize = (size: number) => {
@@ -37,12 +43,17 @@ export default function FontSizeControls() {
     }
   };
 
+  useEffect(() => {
+    applyFontSize(fontSize);
+  }, [fontSize]);
+
   // Save to localStorage and apply
   const updateFontSize = (newSize: number) => {
     const clampedSize = Math.max(12, Math.min(24, newSize));
     setFontSize(clampedSize);
-    applyFontSize(clampedSize);
-    localStorage.setItem('blog-font-size', clampedSize.toString());
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('blog-font-size', clampedSize.toString());
+    }
   };
 
   const handleIncrease = () => {

@@ -7,7 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import { useHapticFeedback } from '@/hooks/use-haptic-feedback';
 import { BlogPostPreview } from '@/types/blog';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 
 interface BlogPageClientProps {
   initialPosts: BlogPostPreview[];
@@ -45,21 +45,14 @@ export function BlogPageClient({
   const router = useRouter();
   const { triggerHaptic, isMobile } = useHapticFeedback();
 
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [filteredPosts, setFilteredPosts] = useState(initialPosts);
-
-  // Get tag from URL params on mount
-  useEffect(() => {
-    const tagParam = searchParams.get('tag');
-    if (tagParam) {
-      setSelectedTag(tagParam);
-      const filtered = getBlogPostsByTagClient(initialPosts, tagParam);
-      setFilteredPosts(filtered);
-    } else {
-      setSelectedTag(null);
-      setFilteredPosts(initialPosts);
-    }
-  }, [searchParams, initialPosts]);
+  const selectedTag = searchParams.get('tag');
+  const filteredPosts = useMemo(
+    () =>
+      selectedTag
+        ? getBlogPostsByTagClient(initialPosts, selectedTag)
+        : initialPosts,
+    [initialPosts, selectedTag],
+  );
 
   // Handle tag click
   const handleTagClick = (tag: string) => {
@@ -68,13 +61,8 @@ export function BlogPageClient({
     }
 
     if (selectedTag === tag) {
-      setSelectedTag(null);
-      setFilteredPosts(initialPosts);
       router.replace('/blog');
     } else {
-      setSelectedTag(tag);
-      const filtered = getBlogPostsByTagClient(initialPosts, tag);
-      setFilteredPosts(filtered);
       router.replace(`/blog?tag=${encodeURIComponent(tag)}`);
     }
   };
@@ -109,8 +97,9 @@ export function BlogPageClient({
               <h2 className="text-lg font-semibold">Popular Tags</h2>
               {selectedTag && (
                 <button
+                  type="button"
                   onClick={() => handleTagClick(selectedTag)}
-                  className="text-muted-foreground hover:text-foreground text-sm underline"
+                  className="text-muted-foreground hover:text-foreground inline-flex min-h-11 items-center text-sm underline"
                 >
                   Clear filter
                 </button>
@@ -122,9 +111,10 @@ export function BlogPageClient({
                 const isSelected = selectedTag === tag;
                 return (
                   <button
+                    type="button"
                     key={tag}
                     onClick={() => handleTagClick(tag)}
-                    className="transition-colors"
+                    className="inline-flex min-h-11 items-center transition-colors"
                   >
                     <Badge
                       variant={isSelected ? 'default' : 'outline'}

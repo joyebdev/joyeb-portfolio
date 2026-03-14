@@ -65,8 +65,9 @@ export default function Blog({ posts }: BlogProps) {
   const activeCardWidth = frameWidth * (isMobile ? 0.7 : 0.6);
   const sideCardWidth = Math.max((frameWidth - activeCardWidth - GAP * 2) / 2, 0);
   const step = sideCardWidth + GAP;
-  const atStart = currentIndex === 0;
-  const atEnd = currentIndex === totalPosts - 1;
+  const boundedIndex = Math.max(0, Math.min(currentIndex, Math.max(totalPosts - 1, 0)));
+  const atStart = boundedIndex === 0;
+  const atEnd = boundedIndex === Math.max(totalPosts - 1, 0);
 
   const getXForIndex = useCallback(
     (index: number) =>
@@ -101,14 +102,9 @@ export default function Blog({ posts }: BlogProps) {
       return;
     }
 
-    const clampedIndex = Math.max(0, Math.min(currentIndex, totalPosts - 1));
-    if (clampedIndex !== currentIndex) {
-      setCurrentIndex(clampedIndex);
-      return;
-    }
-
+    const clampedIndex = Math.max(0, Math.min(boundedIndex, totalPosts - 1));
     x.set(clampX(getXForIndex(clampedIndex)));
-  }, [clampX, currentIndex, frameWidth, getXForIndex, totalPosts, x]);
+  }, [boundedIndex, clampX, frameWidth, getXForIndex, totalPosts, x]);
 
   const goToIndex = useCallback(
     (index: number) => {
@@ -122,15 +118,15 @@ export default function Blog({ posts }: BlogProps) {
 
   const handlePrev = useCallback(() => {
     if (atStart) return;
-    setCurrentIndex((prev) => Math.max(0, prev - 1));
+    setCurrentIndex(Math.max(0, boundedIndex - 1));
     animate(x, clampX(x.get() + step), SPRING_CONFIG);
-  }, [atStart, clampX, step, x]);
+  }, [atStart, boundedIndex, clampX, step, x]);
 
   const handleNext = useCallback(() => {
     if (atEnd) return;
-    setCurrentIndex((prev) => Math.min(totalPosts - 1, prev + 1));
+    setCurrentIndex(Math.min(totalPosts - 1, boundedIndex + 1));
     animate(x, clampX(x.get() - step), SPRING_CONFIG);
-  }, [atEnd, clampX, step, totalPosts, x]);
+  }, [atEnd, boundedIndex, clampX, step, totalPosts, x]);
 
   const handlePanEnd = useCallback(
     (_event: unknown, info: { offset: { x: number } }) => {
@@ -146,23 +142,23 @@ export default function Blog({ posts }: BlogProps) {
     <section id="blogs" className="mt-16 md:mt-20">
       <div className="flex flex-col items-center justify-center gap-1 mb-8 text-center">
         <p className="text-sm text-muted-foreground">Featured</p>
-        <h2 className="text-3xl font-bold">Blogs</h2>
+        <h2 className="text-2xl font-bold sm:text-3xl md:text-4xl lg:text-5xl">Blogs</h2>
         <p className="text-sm text-muted-foreground mt-1">
-          {String(currentIndex + 1).padStart(2, '0')} /{' '}
+          {String(boundedIndex + 1).padStart(2, '0')} /{' '}
           {String(totalPosts).padStart(2, '0')}
         </p>
       </div>
 
       <div
         ref={frameRef}
-        className="h-[378px] md:h-[416px] rounded-2xl md:rounded-3xl border border-border bg-card/30 p-5 md:p-8 relative overflow-hidden w-full"
+        className="h-94.5 md:h-104 rounded-2xl md:rounded-3xl border border-border bg-card/30 p-5 md:p-8 relative overflow-hidden w-full"
       >
         <button
           type="button"
           onClick={handlePrev}
           disabled={atStart}
           aria-label="Previous blog"
-          className={`absolute left-3 top-1/2 z-20 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background/80 backdrop-blur-sm transition-colors duration-150 hover:bg-muted ${
+          className={`absolute left-3 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background/80 backdrop-blur-sm transition-colors duration-150 hover:bg-muted ${
             atStart ? 'opacity-0 pointer-events-none' : ''
           }`}
         >
@@ -174,7 +170,7 @@ export default function Blog({ posts }: BlogProps) {
           onClick={handleNext}
           disabled={atEnd}
           aria-label="Next blog"
-          className={`absolute right-3 top-1/2 z-20 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background/80 backdrop-blur-sm transition-colors duration-150 hover:bg-muted ${
+          className={`absolute right-3 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background/80 backdrop-blur-sm transition-colors duration-150 hover:bg-muted ${
             atEnd ? 'opacity-0 pointer-events-none' : ''
           }`}
         >
@@ -192,13 +188,13 @@ export default function Blog({ posts }: BlogProps) {
             const { frontmatter, slug } = post;
             const number = String(index + 1).padStart(2, '0');
             const tag = frontmatter.tags?.[0] ?? frontmatter.tag ?? 'Blog';
-            const isActive = index === currentIndex;
-            const isAdjacent = Math.abs(index - currentIndex) === 1;
+            const isActive = index === boundedIndex;
+            const isAdjacent = Math.abs(index - boundedIndex) === 1;
             const opacity = isActive ? 1 : isAdjacent ? 0.4 : 0;
             const shiftX =
-              index === currentIndex - 1
+              index === boundedIndex - 1
                 ? -sideCardWidth / 2
-                : index === currentIndex + 1
+                : index === boundedIndex + 1
                   ? sideCardWidth / 2
                   : 0;
 
@@ -304,7 +300,7 @@ export default function Blog({ posts }: BlogProps) {
 
       <div className="flex items-center justify-center gap-1.5 mt-4">
         {safePosts.map((post, index) => {
-          const isActive = index === currentIndex;
+          const isActive = index === boundedIndex;
           return (
             <button
               key={post.slug}

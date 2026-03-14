@@ -10,7 +10,9 @@ export default function Contact() {
       <div className="space-y-8">
         <div className="space-y-2 text-center">
           <p className="text-sm text-muted-foreground">Get in touch</p>
-          <h2 className="text-2xl font-bold sm:text-3xl">{contactConfig.title}</h2>
+          <h2 className="text-2xl font-bold sm:text-3xl md:text-4xl lg:text-5xl">
+            {contactConfig.title}
+          </h2>
           <p className="mx-auto max-w-xl text-sm text-muted-foreground sm:text-base">
             {contactConfig.description}
           </p>

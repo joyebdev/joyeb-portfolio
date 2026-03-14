@@ -1,5 +1,6 @@
 import { BlogPostPreview } from '@/types/blog';
 import { Link } from 'next-view-transitions';
+import { memo } from 'react';
 
 interface BlogCardProps {
   post: BlogPostPreview;
@@ -15,7 +16,10 @@ type BlogCardMeta = BlogPostPreview['frontmatter'] & {
   excerpt?: string;
 };
 
-export function BlogCard({ post, index }: BlogCardProps) {
+export const BlogCard = memo(function BlogCard({
+  post,
+  index,
+}: BlogCardProps): React.JSX.Element {
   const meta = post.frontmatter as BlogCardMeta;
   const publishedDate = meta.date || meta.publishedAt;
   const readingTime = meta.readTime || meta.readingTime;
@@ -24,7 +28,7 @@ export function BlogCard({ post, index }: BlogCardProps) {
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className="group flex min-h-[170px] flex-col justify-between rounded-2xl border border-border bg-card p-4 transition-all duration-200 hover:border-border/60 sm:min-h-[200px] sm:p-6"
+      className="group flex min-h-42.5 flex-col justify-between rounded-2xl border border-border bg-card p-4 transition-all duration-200 hover:border-border/60 sm:min-h-50 sm:p-6"
     >
       <div className="flex flex-col gap-3">
         <span className="text-4xl leading-none font-bold text-muted-foreground/20 select-none sm:text-5xl">
@@ -84,4 +88,6 @@ export function BlogCard({ post, index }: BlogCardProps) {
       </div>
     </Link>
   );
-}
+});
+
+BlogCard.displayName = 'BlogCard';

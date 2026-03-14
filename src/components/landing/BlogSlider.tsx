@@ -91,14 +91,14 @@ export default function BlogSlider({ posts }: { posts: BlogPostPreview[] }) {
       <div className="mb-8 flex items-end justify-between">
         <div>
           <p className="text-sm text-muted-foreground">Featured</p>
-          <h2 className="text-2xl font-bold">Blogs</h2>
+          <h2 className="text-2xl font-bold sm:text-3xl md:text-4xl lg:text-5xl">Blogs</h2>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={handlePrev}
             disabled={atStart}
             aria-label="Previous"
-            className={`flex h-9 w-9 items-center justify-center rounded-full border border-border transition-colors duration-150 hover:bg-muted${atStart ? ' pointer-events-none cursor-not-allowed opacity-40' : ''}`}
+            className={`flex h-11 w-11 items-center justify-center rounded-full border border-border transition-colors duration-150 hover:bg-muted${atStart ? ' pointer-events-none cursor-not-allowed opacity-40' : ''}`}
           >
             <ChevronLeft />
           </button>
@@ -106,14 +106,14 @@ export default function BlogSlider({ posts }: { posts: BlogPostPreview[] }) {
             onClick={handleNext}
             disabled={atEnd}
             aria-label="Next"
-            className={`flex h-9 w-9 items-center justify-center rounded-full border border-border transition-colors duration-150 hover:bg-muted${atEnd ? ' pointer-events-none cursor-not-allowed opacity-40' : ''}`}
+            className={`flex h-11 w-11 items-center justify-center rounded-full border border-border transition-colors duration-150 hover:bg-muted${atEnd ? ' pointer-events-none cursor-not-allowed opacity-40' : ''}`}
           >
             <ChevronRight />
           </button>
         </div>
       </div>
 
-      <div className="relative h-[280px] overflow-hidden">
+      <div className="relative h-70 overflow-hidden">
         <motion.div
           style={{ x }}
           className="flex h-full flex-row gap-6"
@@ -194,10 +194,10 @@ export default function BlogSlider({ posts }: { posts: BlogPostPreview[] }) {
         </motion.div>
 
         {!atStart && (
-          <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-20 bg-gradient-to-r from-background to-transparent" />
+          <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-20 bg-linear-to-r from-background to-transparent" />
         )}
         {!atEnd && (
-          <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-28 bg-gradient-to-l from-background to-transparent" />
+          <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-28 bg-linear-to-l from-background to-transparent" />
         )}
       </div>
     </section>
