@@ -1,6 +1,5 @@
 'use client';
 
-import { getPublishedBlogPosts } from '@/lib/blog';
 import type { BlogPostPreview } from '@/types/blog';
 import { animate, motion, useMotionValue } from 'motion/react';
 import { Link } from 'next-view-transitions';
@@ -50,8 +49,11 @@ function ChevronRight() {
   );
 }
 
-export default function Blog() {
-  const posts = getPublishedBlogPosts();
+type BlogProps = {
+  posts: BlogPostPreview[];
+};
+
+export default function Blog({ posts }: BlogProps) {
   const frameRef = useRef<HTMLDivElement>(null);
   const [frameWidth, setFrameWidth] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
