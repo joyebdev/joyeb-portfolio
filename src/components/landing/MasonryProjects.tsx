@@ -1,155 +1,371 @@
 'use client';
 
-import { useRef } from 'react';
-import { motion, useInView } from 'motion/react';
-import Image from 'next/image';
 import { projects } from '@/config/Projects';
-import SectionHeading from '@/components/common/SectionHeading';
-import ArrowUpRight from '@/components/svgs/ArrowUpRight';
+import { ExternalLink, Github, PlayCircle } from 'lucide-react';
+import {
+  motion,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  useTransform,
+} from 'motion/react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRef } from 'react';
 
-export default function MasonryProjects() {
-  return (
-    <section id="projects" className="py-14 px-0 sm:py-20">
-      {/* Header */}
-      <div className="mb-10 flex items-end justify-between gap-4 sm:mb-12">
-        <div>
-          <p className="text-sm text-muted-foreground mb-1">Featured</p>
-          <SectionHeading subHeading="" heading="Projects" />
-        </div>
-        <span className="hidden text-sm text-muted-foreground sm:inline">
-          {projects.length} projects
-        </span>
+type FeedMode = 'homepage' | 'page';
+
+type ProjectCardData = {
+  number: string;
+  title: string;
+  description: string;
+  category: string;
+  imageUrl: string;
+  liveUrl: string;
+  githubUrl: string;
+  technologies: { name: string; icon: React.ReactNode }[];
+};
+
+const CARD_ACCENT = '#4ADE80';
+
+const projectCards: ProjectCardData[] = projects.map((project, index) => {
+  const category =
+    project.technologies.length > 0
+      ? project.technologies
+          .slice(0, 2)
+          .map((technology) => technology.name)
+          .join(' / ')
+      : 'Web Project';
+
+  return {
+    number: String(index + 1).padStart(2, '0'),
+    title: project.title,
+    description: project.description,
+    category,
+    imageUrl: project.image,
+    liveUrl: project.live || project.link,
+    githubUrl: project.github || '',
+    technologies: project.technologies,
+  };
+});
+
+function ActionButton({
+  href,
+  icon,
+  label,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  label: string;
+}) {
+  const baseClassName =
+    'flex-1 flex items-center justify-center gap-2 rounded-lg border border-white/20 px-4 py-2.5 text-sm text-white transition-all duration-200';
+
+  if (!href) {
+    return (
+      <div className={`${baseClassName} cursor-not-allowed opacity-50`} aria-disabled="true">
+        {icon}
+        <span>{label}</span>
       </div>
+    );
+  }
 
-      {/* Single column list */}
-      <div className="flex flex-col gap-3">
-        {projects.map((project, index) => (
-          <ProjectCard
-            key={project.title}
-            project={project}
-            index={index}
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`${baseClassName} hover:border-white/30 hover:bg-white/5`}
+    >
+      {icon}
+      <span>{label}</span>
+    </a>
+  );
+}
+
+function ProjectCard({
+  title,
+  description,
+  category,
+  imageUrl,
+  liveUrl,
+  githubUrl,
+  technologies,
+}: ProjectCardData) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const prefersReducedMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: cardRef,
+    offset: ['start 0.92', 'end 0.08'],
+  });
+
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 140,
+    damping: 24,
+    mass: 0.35,
+  });
+
+  const cardY = useTransform(
+    smoothProgress,
+    [0, 0.5, 1],
+    prefersReducedMotion ? [0, 0, 0] : [28, 0, -18],
+  );
+  const borderOpacity = useTransform(
+    smoothProgress,
+    [0, 0.2, 0.5, 0.8, 1],
+    prefersReducedMotion ? [0.12, 0.12, 0.12, 0.12, 0.12] : [0.06, 0.12, 0.28, 0.12, 0.06],
+  );
+  const accentOpacity = useTransform(
+    smoothProgress,
+    [0, 0.2, 0.5, 0.8, 1],
+    prefersReducedMotion ? [0.04, 0.04, 0.04, 0.04, 0.04] : [0, 0.04, 0.18, 0.04, 0],
+  );
+  const borderScale = useTransform(
+    smoothProgress,
+    [0, 0.5, 1],
+    prefersReducedMotion ? [1, 1, 1] : [0.985, 1, 0.99],
+  );
+  const imageScale = useTransform(
+    smoothProgress,
+    [0, 0.5, 1],
+    prefersReducedMotion ? [1, 1, 1] : [1.03, 1, 1.015],
+  );
+
+  return (
+    <div ref={cardRef} className="mx-auto w-full max-w-lg">
+      <motion.div style={{ y: cardY }}>
+        <motion.div
+          className="group relative w-full overflow-hidden rounded-[1.35rem] border border-white/10 bg-white/6 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-xl transition-all duration-300 supports-backdrop-filter:bg-white/8"
+          whileHover={
+            prefersReducedMotion
+              ? undefined
+              : {
+                  y: -8,
+                  boxShadow: `0 20px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px ${CARD_ACCENT}`,
+                }
+          }
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.35 }}
+        >
+          <motion.div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 rounded-[1.35rem] border border-white/12"
+            style={{ opacity: borderOpacity, scale: borderScale }}
           />
+          <motion.div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 rounded-[1.35rem] border border-[#4ADE80]/20"
+            style={{ opacity: accentOpacity }}
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-px rounded-[1.25rem] bg-linear-to-br from-white/10 via-white/4 to-transparent"
+          />
+
+          <article className="relative overflow-hidden rounded-[1.05rem] border border-[#2A2A2A] bg-[#1A1A1A]">
+            <motion.div
+              className="relative h-60 overflow-hidden rounded-t-[1.05rem] bg-[#0D0D0D] sm:h-64"
+              style={{ scale: imageScale }}
+            >
+              <Image
+                src={imageUrl}
+                alt={title}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-linear-to-b from-transparent to-[#1A1A1A]/20" />
+            </motion.div>
+
+            <div className="space-y-4 p-5">
+              <div className="inline-flex items-center rounded-full border border-[#4ADE80]/20 bg-[#4ADE80]/10 px-3 py-1">
+                <span className="text-xs text-[#4ADE80]">{category}</span>
+              </div>
+
+              <h3 className="text-xl font-semibold tracking-tight text-white">{title}</h3>
+
+              <p className="line-clamp-2 text-sm leading-relaxed text-white/60">{description}</p>
+
+              <div className="flex items-center gap-2">
+                {technologies.slice(0, 3).map((technology, iconIndex) => (
+                  <span
+                    key={`${title}-${technology.name}-${iconIndex}`}
+                    title={technology.name}
+                    className="flex h-7 w-7 items-center justify-center rounded-md border border-white/15 bg-black/20 [&_img]:h-3.5 [&_img]:w-3.5 [&_svg]:h-3.5 [&_svg]:w-3.5"
+                  >
+                    {technology.icon}
+                  </span>
+                ))}
+              </div>
+
+              <div className="h-px bg-[#2A2A2A]" />
+
+              <div className="flex gap-3">
+                <ActionButton
+                  href={liveUrl}
+                  icon={<PlayCircle className="h-4 w-4" />}
+                  label="Live Preview"
+                />
+                <ActionButton
+                  href={githubUrl}
+                  icon={<Github className="h-4 w-4" />}
+                  label={githubUrl ? 'Source Code' : 'Private'}
+                />
+              </div>
+            </div>
+          </article>
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+}
+
+function StackedProjectCard({
+  project,
+  index,
+  total,
+}: {
+  project: ProjectCardData;
+  index: number;
+  total: number;
+}) {
+  const stackRef = useRef<HTMLDivElement>(null);
+  const prefersReducedMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: stackRef,
+    offset: ['start 0.96', 'end 0.04'],
+  });
+
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 110,
+    damping: 28,
+    mass: 0.5,
+  });
+
+  const remainingCards = Math.max(total - index - 1, 0);
+  const liftDistance = Math.min(remainingCards * 28 + 12, 220);
+  const settleScale = Math.max(1 - remainingCards * 0.008, 0.95);
+  const settleOpacity = Math.max(1 - remainingCards * 0.02, 0.86);
+
+  const stackY = useTransform(
+    smoothProgress,
+    [0, 0.45, 0.78, 1],
+    prefersReducedMotion ? [0, 0, 0, 0] : [36, 0, -liftDistance * 0.35, -liftDistance],
+  );
+  const stackScale = useTransform(
+    smoothProgress,
+    [0, 0.5, 1],
+    prefersReducedMotion ? [1, 1, 1] : [1, 1, settleScale],
+  );
+  const stackOpacity = useTransform(
+    smoothProgress,
+    [0, 0.5, 1],
+    prefersReducedMotion ? [1, 1, 1] : [0.92, 1, settleOpacity],
+  );
+
+  return (
+    <div
+      ref={stackRef}
+      className="sticky top-24 w-full pb-7 sm:top-28 sm:pb-9"
+      style={{ zIndex: index + 1 }}
+    >
+      <motion.div
+        style={{
+          y: stackY,
+          scale: stackScale,
+          opacity: stackOpacity,
+          transformOrigin: 'top center',
+        }}
+      >
+        <ProjectCard {...project} />
+      </motion.div>
+    </div>
+  );
+}
+
+function ProjectCardList({
+  items,
+  stacked = false,
+}: {
+  items: ProjectCardData[];
+  stacked?: boolean;
+}) {
+  if (!stacked) {
+    return (
+      <div className="flex flex-col items-center gap-6">
+        {items.map((project) => (
+          <ProjectCard key={project.number} {...project} />
         ))}
       </div>
+    );
+  }
 
-      <div className="flex justify-center mt-16">
-        <a
-          href="/#contact"
-          className="group flex w-full items-center justify-center gap-2 rounded-full border border-border px-6 py-3 text-sm text-muted-foreground transition-all duration-200 hover:border-foreground/30 hover:text-foreground sm:w-auto sm:px-8"
+  return (
+    <div className="relative mx-auto w-full overflow-visible rounded-[1.75rem] border border-transparent px-1 pb-10 pt-8 sm:px-2 sm:pb-12 sm:pt-10">
+      {items.map((project, index) => (
+        <StackedProjectCard
+          key={project.number}
+          project={project}
+          index={index}
+          total={items.length}
+        />
+      ))}
+    </div>
+  );
+}
+
+export function ProjectsVerticalFeed({ mode }: { mode: FeedMode }) {
+  const visibleProjects =
+    mode === 'homepage' ? projectCards.slice(0, 2) : projectCards;
+
+  if (mode === 'page') {
+    return (
+      <section className="min-h-screen bg-[#0D0D0D] px-4 pb-12 pt-20 sm:px-6">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-16 space-y-4">
+            <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
+              Featured Projects
+            </h1>
+            <p className="max-w-2xl text-base text-white/60 sm:text-lg">
+              A collection of professional web development projects showcasing modern
+              design and full-stack capabilities.
+            </p>
+          </div>
+
+          <ProjectCardList items={visibleProjects} stacked />
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section id="projects" className="mt-20 space-y-8">
+      <div className="space-y-3 text-center">
+        <h2 className="text-4xl font-bold tracking-tight sm:text-5xl">My Works</h2>
+        <p className="text-base font-medium text-secondary sm:text-lg">Featured Work</p>
+        <p className="mx-auto max-w-2xl text-lg text-muted-foreground sm:text-xl">
+          Custom websites and apps crafted for real businesses, each focused on fast
+          performance, clean user flows, and modern visual storytelling.
+        </p>
+      </div>
+
+      <ProjectCardList items={visibleProjects} stacked />
+
+      <div className="flex justify-center">
+        <Link
+          href="/projects"
+          className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm transition-colors hover:bg-muted"
         >
-          Let&apos;s work together
-          <ArrowUpRight className="h-4 w-4 flex-shrink-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-200" />
-        </a>
+          View all projects
+          <ExternalLink className="h-4 w-4" />
+        </Link>
       </div>
     </section>
   );
 }
 
-interface CardProps {
-  project: (typeof projects)[0];
-  index: number;
-}
-
-function ProjectCard({ project, index }: CardProps) {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, {
-    once: true,
-    margin: '-30px',
-  });
-
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 16 }}
-      animate={
-        isInView
-          ? { opacity: 1, y: 0 }
-          : { opacity: 0, y: 16 }
-      }
-      transition={{
-        duration: 0.4,
-        delay: index * 0.05,
-        ease: [0.25, 0.1, 0.25, 1],
-      }}
-      className="group flex w-full flex-col overflow-hidden rounded-xl border border-border bg-card transition-all duration-200 hover:border-border/60 sm:flex-row"
-    >
-      {/* Left: Screenshot image */}
-      <div
-        className="relative h-44 w-full shrink-0 overflow-hidden border-b border-border bg-muted sm:h-auto sm:w-56 sm:border-r sm:border-b-0"
-      >
-        {project.image && (
-          <Image
-            src={project.image}
-            alt={project.title}
-            fill
-            className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
-            onError={(e) => {
-              const t = e.currentTarget as HTMLImageElement;
-              t.style.display = 'none';
-            }}
-          />
-        )}
-      </div>
-
-      {/* Right: Content */}
-      <div className="flex min-w-0 flex-1 flex-col justify-between p-3 sm:p-4">
-        {/* Top: index + title + description */}
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-foreground leading-snug">
-              {project.title}
-            </h3>
-            <span className="text-xs font-mono text-muted-foreground/50 ml-2 shrink-0">
-              {String(index + 1).padStart(2, '0')}
-            </span>
-          </div>
-          <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-            {project.description}
-          </p>
-        </div>
-
-        {/* Bottom: tech icons + live link */}
-        <div className="flex items-center justify-between border-t border-border pt-3">
-          {/* Tech icons */}
-          <div className="flex items-center gap-1.5">
-            {project.technologies?.slice(0, 3).map((tech, i) => (
-              <div
-                key={i}
-                title={tech.name}
-                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-border bg-muted [&>img]:h-3 [&>img]:w-3 [&>svg]:h-3 [&>svg]:w-3 sm:[&>img]:h-3.5 sm:[&>img]:w-3.5 sm:[&>svg]:h-3.5 sm:[&>svg]:w-3.5"
-              >
-                {tech.icon}
-              </div>
-            ))}
-          </div>
-
-          {/* Live site link */}
-          {project.live && (
-            <a
-              href={project.live}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group/link flex shrink-0 items-center gap-1.5 text-[11px] font-medium text-muted-foreground transition-colors duration-150 hover:text-foreground sm:text-xs"
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-green-500 shrink-0" />
-              Live Site
-              <svg
-                width="11"
-                height="11"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="group-hover/link:translate-x-px group-hover/link:-translate-y-px transition-transform duration-150"
-              >
-                <path d="M7 17L17 7M17 7H7M17 7v10" />
-              </svg>
-            </a>
-          )}
-        </div>
-      </div>
-    </motion.div>
-  );
+export default function MasonryProjects() {
+  return <ProjectsVerticalFeed mode="homepage" />;
 }
