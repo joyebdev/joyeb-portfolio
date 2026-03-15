@@ -37,6 +37,24 @@ const initialMessages: Message[] = [
   },
 ];
 
+function toUserFriendlyChatError(message: string): string {
+  const normalized = message.toLowerCase();
+
+  if (
+    normalized.includes('api key') ||
+    normalized.includes('not configured') ||
+    normalized.includes('authentication')
+  ) {
+    return 'Chat is unavailable right now. Configure a valid GEMINI_API_KEY in .env.local and restart the server.';
+  }
+
+  if (normalized.includes('rate-limited') || normalized.includes('too many requests')) {
+    return 'Chat is temporarily rate-limited. Please wait a minute and try again.';
+  }
+
+  return message;
+}
+
 const ChatBubble: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [newMessage, setNewMessage] = useState('');
@@ -256,12 +274,15 @@ const ChatBubble: React.FC = () => {
         }
       }
     } catch (error) {
-      console.error('Error sending message:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Chat request failed:', error);
+      }
 
       const fallbackError =
         "I'm sorry, I'm having trouble responding right now. Please try again later.";
-      const userFacingError =
+      const rawErrorMessage =
         error instanceof Error && error.message ? error.message : fallbackError;
+      const userFacingError = toUserFriendlyChatError(rawErrorMessage);
 
       setMessages((prev) =>
         prev.map((msg) =>

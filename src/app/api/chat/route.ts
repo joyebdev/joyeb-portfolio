@@ -122,6 +122,23 @@ function extractGeminiErrorMessage(payload: unknown): string | null {
   return typeof message === 'string' ? message : null;
 }
 
+function normalizeProviderErrorMessage(message: string | null): string | null {
+  if (!message) {
+    return null;
+  }
+
+  const normalized = message.toLowerCase();
+  if (
+    normalized.includes('api key') ||
+    normalized.includes('credential') ||
+    normalized.includes('auth')
+  ) {
+    return 'Chat is not configured correctly. Please set a valid GEMINI_API_KEY.';
+  }
+
+  return message;
+}
+
 type GeminiResult =
   | {
       ok: true;
@@ -161,6 +178,8 @@ async function requestGemini(
       providerMessage = null;
     }
 
+    const normalizedProviderMessage = normalizeProviderErrorMessage(providerMessage);
+
     const isRateLimited = response.status === 429;
     const isLastModel = index === GEMINI_MODELS.length - 1;
 
@@ -182,7 +201,8 @@ async function requestGemini(
       ok: false,
       status: response.status,
       userMessage:
-        providerMessage || 'AI service request failed. Please try again later.',
+        normalizedProviderMessage ||
+        'AI service request failed. Please try again later.',
     };
   }
 

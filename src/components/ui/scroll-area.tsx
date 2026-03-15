@@ -2,8 +2,37 @@
 
 import { cn } from '@/lib/utils';
 import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area';
-import type Lenis from 'lenis';
 import * as React from 'react';
+
+type LenisControl = {
+  start?: () => void;
+  stop?: () => void;
+};
+
+type LenisContainer = {
+  lenis?: LenisControl;
+};
+
+function resolveLenisControl(value: unknown): LenisControl | null {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const direct = value as LenisControl;
+  if (typeof direct.start === 'function' || typeof direct.stop === 'function') {
+    return direct;
+  }
+
+  const nested = (value as LenisContainer).lenis;
+  if (
+    nested &&
+    (typeof nested.start === 'function' || typeof nested.stop === 'function')
+  ) {
+    return nested;
+  }
+
+  return null;
+}
 
 function ScrollArea({
   className,
@@ -11,27 +40,40 @@ function ScrollArea({
   ...props
 }: React.ComponentProps<typeof ScrollAreaPrimitive.Root>) {
   const viewportRef = React.useRef<HTMLDivElement | null>(null);
-  const [lenisInstance, setLenisInstance] = React.useState<Lenis | null>(null);
+  const lenisControlRef = React.useRef<LenisControl | null>(null);
 
   React.useEffect(() => {
-    type WindowWithLenis = Window & { lenis?: Lenis };
-    if (
-      typeof window !== 'undefined' &&
-      (window as unknown as WindowWithLenis).lenis
-    ) {
-      setLenisInstance((window as unknown as WindowWithLenis).lenis!);
+    type WindowWithLenis = Window & { lenis?: unknown };
+
+    const assignLenisControl = () => {
+      if (typeof window === 'undefined') {
+        return;
+      }
+
+      lenisControlRef.current = resolveLenisControl(
+        (window as unknown as WindowWithLenis).lenis,
+      );
+    };
+
+    assignLenisControl();
+
+    if (!lenisControlRef.current) {
+      const timer = window.setTimeout(assignLenisControl, 250);
+      return () => {
+        window.clearTimeout(timer);
+      };
     }
   }, []);
 
   const onMouseEnter = () => {
-    if (lenisInstance) {
-      lenisInstance.stop(); // Stop Lenis scrolling when mouse inside chat
+    if (typeof lenisControlRef.current?.stop === 'function') {
+      lenisControlRef.current.stop(); // Stop Lenis scrolling when mouse inside chat
     }
   };
 
   const onMouseLeave = () => {
-    if (lenisInstance) {
-      lenisInstance.start(); // Resume Lenis scrolling when mouse leaves chat
+    if (typeof lenisControlRef.current?.start === 'function') {
+      lenisControlRef.current.start(); // Resume Lenis scrolling when mouse leaves chat
     }
   };
 

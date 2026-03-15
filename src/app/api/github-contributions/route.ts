@@ -22,6 +22,8 @@ type DenoContribution = {
 const PRIMARY_URL = 'https://github-contributions-api.deno.dev/joyeb-kothiya29';
 const FALLBACK_URL =
   'https://github.com/users/joyeb-kothiya29/contributions';
+const FETCH_TIMEOUT_MS = 3500;
+const GRID_CELL_COUNT = 52 * 7;
 
 type NextFetchRequestInit = RequestInit & {
   next?: {
@@ -32,6 +34,20 @@ type NextFetchRequestInit = RequestInit & {
 const REVALIDATE_OPTIONS: NextFetchRequestInit = {
   next: { revalidate: 300 },
 };
+
+async function safeFetch(
+  url: string,
+  init: NextFetchRequestInit = REVALIDATE_OPTIONS,
+): Promise<Response | null> {
+  try {
+    return await fetch(url, {
+      ...init,
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    });
+  } catch {
+    return null;
+  }
+}
 
 function isValidDateString(value: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(value);
@@ -185,10 +201,37 @@ function parseFallbackHtml(html: string): ContributionPayload | null {
   };
 }
 
-async function getPrimaryPayload(): Promise<ContributionPayload | null> {
-  const primaryResponse = await fetch(PRIMARY_URL, REVALIDATE_OPTIONS);
+function createEmptyPayload(): ContributionPayload {
+  const today = new Date();
+  const endUTC = new Date(
+    Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()),
+  );
+  const startUTC = new Date(endUTC);
+  startUTC.setUTCDate(startUTC.getUTCDate() - (GRID_CELL_COUNT - 1));
 
-  if (primaryResponse.ok) {
+  const contributions: ContributionDay[] = [];
+
+  for (let index = 0; index < GRID_CELL_COUNT; index += 1) {
+    const date = new Date(startUTC);
+    date.setUTCDate(startUTC.getUTCDate() + index);
+
+    contributions.push({
+      count: 0,
+      date: date.toISOString().slice(0, 10),
+      level: 0,
+    });
+  }
+
+  return {
+    contributions,
+    totalContributions: 0,
+  };
+}
+
+async function getPrimaryPayload(): Promise<ContributionPayload | null> {
+  const primaryResponse = await safeFetch(PRIMARY_URL);
+
+  if (primaryResponse?.ok) {
     const primaryText = await primaryResponse.text();
 
     try {
@@ -201,9 +244,9 @@ async function getPrimaryPayload(): Promise<ContributionPayload | null> {
     }
   }
 
-  const jsonResponse = await fetch(`${PRIMARY_URL}.json`, REVALIDATE_OPTIONS);
+  const jsonResponse = await safeFetch(`${PRIMARY_URL}.json`);
 
-  if (!jsonResponse.ok) {
+  if (!jsonResponse?.ok) {
     return null;
   }
 
@@ -212,9 +255,15 @@ async function getPrimaryPayload(): Promise<ContributionPayload | null> {
 }
 
 async function getFallbackPayload(): Promise<ContributionPayload | null> {
-  const response = await fetch(FALLBACK_URL, REVALIDATE_OPTIONS);
+  const response = await safeFetch(FALLBACK_URL, {
+    ...REVALIDATE_OPTIONS,
+    headers: {
+      Accept: 'text/html',
+      'User-Agent': 'joyeb-portfolio/1.0',
+    },
+  });
 
-  if (!response.ok) {
+  if (!response?.ok) {
     return null;
   }
 
@@ -234,14 +283,8 @@ export async function GET() {
       return Response.json(fallbackPayload);
     }
 
-    return Response.json(
-      { error: 'Unable to fetch contribution data.' },
-      { status: 502 },
-    );
+    return Response.json(createEmptyPayload());
   } catch {
-    return Response.json(
-      { error: 'Unable to fetch contribution data.' },
-      { status: 500 },
-    );
+    return Response.json(createEmptyPayload());
   }
 }
