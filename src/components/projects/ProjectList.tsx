@@ -51,7 +51,7 @@ export default function ProjectList() {
                   </span>
                 </div>
 
-                <div className="relative h-[200px] w-full overflow-hidden">
+                <div className="relative h-50 w-full overflow-hidden">
                   <Image
                     src={project.image}
                     alt={project.title}

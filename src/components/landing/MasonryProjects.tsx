@@ -121,3 +121,7 @@ export function ProjectsVerticalFeed() {
     </section>
   );
 }
+
+export default function MasonryProjects() {
+  return <ProjectsVerticalFeed />;
+}
