@@ -241,8 +241,7 @@ export default function Blog({ posts }: BlogProps) {
                         </div>
 
                         <span className="text-xs font-medium flex items-center gap-1">
-                          Read
-                          <span>→</span>
+                          Read blog
                           <svg
                             aria-hidden="true"
                             className="h-3.5 w-3.5"
