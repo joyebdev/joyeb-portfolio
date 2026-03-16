@@ -13,14 +13,14 @@ function getCategory(project: (typeof projects)[number]): string {
 
 export default function ProjectList() {
   return (
-    <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 px-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 px-4 md:grid-cols-3">
       {projects.map((project, index) => {
         const category = getCategory(project);
 
         return (
           <motion.article
             key={project.title}
-            className="group relative mx-auto flex w-full max-w-84 flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0D0D0D] transition-all duration-300 hover:-translate-y-1 hover:border-[#4ADE80]/50 hover:shadow-[0_0_30px_rgba(74,222,128,0.1)]"
+            className="group relative flex w-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0D0D0D] transition-all duration-300 hover:-translate-y-1 hover:border-[#4ADE80]/50 hover:shadow-[0_0_30px_rgba(74,222,128,0.1)]"
             whileHover={{
               y: -4,
             }}
