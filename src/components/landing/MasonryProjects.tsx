@@ -446,167 +446,128 @@ ReelProjectCard.displayName = 'ReelProjectCard';
 function ProjectReel({ items }: { items: ProjectCardData[] }) {
   const reelRef = useRef<HTMLDivElement | null>(null);
   const touchStartYRef = useRef<number | null>(null);
-  const lastSwitchAtRef = useRef(0);
-  const unlockTimerRef = useRef<number | null>(null);
-  const [activeCardIndex, setActiveCardIndex] = useState(0);
-  const [hasSeenBothCards, setHasSeenBothCards] = useState(false);
-  const [isScrollLocked, setIsScrollLocked] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [activeCard, setActiveCard] = useState(0);
+  const [isLocked, setIsLocked] = useState(false);
   const reelItems = items.slice(0, 2);
 
-  const switchCard = useCallback(
-    (direction: 1 | -1) => {
-      const now = Date.now();
-      if (now - lastSwitchAtRef.current < SWITCH_COOLDOWN_MS) {
-        return;
-      }
+  const lockScroll = useCallback(() => {
+    const scrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.width = '100%';
+    document.body.dataset.scrollY = String(scrollY);
+  }, []);
 
-      setActiveCardIndex((current) => {
-        if (direction === 1 && current < reelItems.length - 1) {
-          lastSwitchAtRef.current = now;
+  const unlockScroll = useCallback(() => {
+    const scrollY = parseInt(document.body.dataset.scrollY || '0', 10);
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    document.body.style.width = '';
+    window.scrollTo(0, scrollY);
+  }, []);
 
-          if (current === 0) {
-            setHasSeenBothCards(true);
-          }
+  const startDebounce = useCallback(() => {
+    if (debounceRef.current) {
+      window.clearTimeout(debounceRef.current);
+    }
 
-          return current + 1;
-        }
-
-        if (direction === -1 && current > 0) {
-          lastSwitchAtRef.current = now;
-          return current - 1;
-        }
-
-        return current;
-      });
-    },
-    [reelItems.length],
-  );
+    debounceRef.current = window.setTimeout(() => {
+      debounceRef.current = null;
+    }, SWITCH_COOLDOWN_MS);
+  }, []);
 
   const handleWheel = useCallback(
     (event: WheelEvent) => {
-      if (!isScrollLocked) {
-        return;
-      }
-
-      if (event.deltaY > WHEEL_SWITCH_THRESHOLD) {
-        event.preventDefault();
-        switchCard(1);
-      } else if (event.deltaY < -WHEEL_SWITCH_THRESHOLD) {
-        event.preventDefault();
-        switchCard(-1);
-      }
-    },
-    [isScrollLocked, switchCard],
-  );
-
-  const handleTouchStart = useCallback(
-    (event: TouchEvent) => {
-      if (!isScrollLocked) {
-        return;
-      }
-
-      touchStartYRef.current = event.touches[0]?.clientY ?? null;
-    },
-    [isScrollLocked],
-  );
-
-  const handleTouchMove = useCallback(
-    (event: TouchEvent) => {
-      if (!isScrollLocked) {
+      if (!isLocked) {
         return;
       }
 
       event.preventDefault();
+
+      if (debounceRef.current) {
+        return;
+      }
+
+      if (event.deltaY > WHEEL_SWITCH_THRESHOLD && activeCard === 0) {
+        setActiveCard(1);
+        unlockScroll();
+        setIsLocked(false);
+        startDebounce();
+      } else if (event.deltaY < -WHEEL_SWITCH_THRESHOLD && activeCard === 1) {
+        setActiveCard(0);
+        startDebounce();
+      }
     },
-    [isScrollLocked],
+    [activeCard, isLocked, startDebounce, unlockScroll],
   );
 
-  const handleTouchEnd = useCallback(
+  const handleTouchStart = useCallback(
     (event: TouchEvent) => {
-      if (!isScrollLocked || touchStartYRef.current === null) {
-        return;
-      }
-
-      const endY = event.changedTouches[0]?.clientY ?? touchStartYRef.current;
-      const distance = endY - touchStartYRef.current;
-
-      if (distance < -TOUCH_SWIPE_THRESHOLD) {
-        switchCard(1);
-      } else if (distance > TOUCH_SWIPE_THRESHOLD) {
-        switchCard(-1);
-      }
-
-      touchStartYRef.current = null;
-    },
-    [isScrollLocked, switchCard],
-  );
-
-  const handleUnlockedWheel = useCallback(
-    (event: React.WheelEvent<HTMLDivElement>) => {
-      if (isScrollLocked || !hasSeenBothCards || activeCardIndex !== 1) {
-        return;
-      }
-
-      if (event.deltaY < -WHEEL_SWITCH_THRESHOLD) {
-        switchCard(-1);
-      }
-    },
-    [activeCardIndex, hasSeenBothCards, isScrollLocked, switchCard],
-  );
-
-  const handleUnlockedTouchStart = useCallback(
-    (event: React.TouchEvent<HTMLDivElement>) => {
-      if (isScrollLocked || !hasSeenBothCards || activeCardIndex !== 1) {
+      if (!isLocked) {
         return;
       }
 
       touchStartYRef.current = event.touches[0]?.clientY ?? null;
     },
-    [activeCardIndex, hasSeenBothCards, isScrollLocked],
+    [isLocked],
   );
 
-  const handleUnlockedTouchEnd = useCallback(
-    (event: React.TouchEvent<HTMLDivElement>) => {
-      if (
-        isScrollLocked ||
-        !hasSeenBothCards ||
-        activeCardIndex !== 1 ||
-        touchStartYRef.current === null
-      ) {
+  const handleTouchEnd = useCallback(
+    (event: TouchEvent) => {
+      if (!isLocked || touchStartYRef.current === null) {
+        return;
+      }
+
+      if (debounceRef.current) {
+        touchStartYRef.current = null;
         return;
       }
 
       const endY = event.changedTouches[0]?.clientY ?? touchStartYRef.current;
       const distance = endY - touchStartYRef.current;
 
-      if (distance > TOUCH_SWIPE_THRESHOLD) {
-        switchCard(-1);
+      if (distance < -TOUCH_SWIPE_THRESHOLD && activeCard === 0) {
+        setActiveCard(1);
+        unlockScroll();
+        setIsLocked(false);
+        startDebounce();
+      } else if (distance > TOUCH_SWIPE_THRESHOLD && activeCard === 1) {
+        setActiveCard(0);
+        startDebounce();
       }
 
       touchStartYRef.current = null;
     },
-    [activeCardIndex, hasSeenBothCards, isScrollLocked, switchCard],
+    [activeCard, isLocked, startDebounce, unlockScroll],
   );
 
   useEffect(() => {
     const reelSection = reelRef.current;
 
-    if (!reelSection || hasSeenBothCards || reelItems.length < 2) {
+    if (!reelSection || reelItems.length < 2) {
       return;
     }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.35) {
-          setIsScrollLocked(true);
+        if (entry.isIntersecting) {
+          setActiveCard(0);
+          lockScroll();
+          setIsLocked(true);
+          return;
         }
 
-        if (!entry.isIntersecting) {
-          setIsScrollLocked(false);
-        }
+        unlockScroll();
+        setIsLocked(false);
+        setActiveCard(0);
       },
       {
-        threshold: [0, 0.35, 0.7, 1],
+        threshold: 0.85,
       },
     );
 
@@ -614,62 +575,40 @@ function ProjectReel({ items }: { items: ProjectCardData[] }) {
 
     return () => {
       observer.disconnect();
+      unlockScroll();
     };
-  }, [hasSeenBothCards, reelItems.length]);
+  }, [lockScroll, reelItems.length, unlockScroll]);
 
   useEffect(() => {
-    if (!hasSeenBothCards) {
+    if (!isLocked) {
       return;
     }
 
-    unlockTimerRef.current = window.setTimeout(() => {
-      setIsScrollLocked(false);
-      lastSwitchAtRef.current = 0;
-    }, 420);
-
-    return () => {
-      if (unlockTimerRef.current) {
-        window.clearTimeout(unlockTimerRef.current);
-      }
-    };
-  }, [hasSeenBothCards]);
-
-  useEffect(() => {
-    if (!isScrollLocked || hasSeenBothCards) {
-      document.body.style.overflow = '';
+    const section = reelRef.current;
+    if (!section) {
       return;
     }
 
-    document.body.style.overflow = 'hidden';
-    window.addEventListener('wheel', handleWheel, { passive: false });
-    window.addEventListener('touchstart', handleTouchStart, { passive: false });
-    window.addEventListener('touchmove', handleTouchMove, { passive: false });
-    window.addEventListener('touchend', handleTouchEnd, { passive: false });
+    section.addEventListener('wheel', handleWheel, { passive: false });
+    section.addEventListener('touchstart', handleTouchStart, { passive: true });
+    section.addEventListener('touchend', handleTouchEnd, { passive: true });
 
     return () => {
-      document.body.style.overflow = '';
-      window.removeEventListener('wheel', handleWheel);
-      window.removeEventListener('touchstart', handleTouchStart);
-      window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('touchend', handleTouchEnd);
+      section.removeEventListener('wheel', handleWheel);
+      section.removeEventListener('touchstart', handleTouchStart);
+      section.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [
-    handleTouchEnd,
-    handleTouchMove,
-    handleTouchStart,
-    handleWheel,
-    hasSeenBothCards,
-    isScrollLocked,
-  ]);
+  }, [handleTouchEnd, handleTouchStart, handleWheel, isLocked]);
 
   useEffect(() => {
     return () => {
-      document.body.style.overflow = '';
-      if (unlockTimerRef.current) {
-        window.clearTimeout(unlockTimerRef.current);
+      unlockScroll();
+      if (debounceRef.current) {
+        window.clearTimeout(debounceRef.current);
+        debounceRef.current = null;
       }
     };
-  }, []);
+  }, [unlockScroll]);
 
   return (
     <div ref={reelRef} className="relative mx-auto w-full max-w-3xl">
@@ -679,9 +618,6 @@ function ProjectReel({ items }: { items: ProjectCardData[] }) {
 
         <div
           className="relative h-[70vh] min-h-136 max-h-192 overflow-hidden rounded-[1.55rem] p-3 md:p-4 sm:h-[74vh]"
-          onWheel={handleUnlockedWheel}
-          onTouchStart={handleUnlockedTouchStart}
-          onTouchEnd={handleUnlockedTouchEnd}
         >
           {reelItems.map((project, index) => (
             <motion.div
@@ -690,9 +626,9 @@ function ProjectReel({ items }: { items: ProjectCardData[] }) {
               initial={false}
               animate={{
                 y:
-                  index < activeCardIndex
+                  index < activeCard
                     ? '-100%'
-                    : index > activeCardIndex
+                    : index > activeCard
                       ? '100%'
                       : '0%',
               }}
@@ -701,7 +637,7 @@ function ProjectReel({ items }: { items: ProjectCardData[] }) {
                 stiffness: 300,
                 damping: 30,
               }}
-              style={{ zIndex: index === activeCardIndex ? 2 : 1 }}
+              style={{ zIndex: index === activeCard ? 2 : 1 }}
             >
               <ReelProjectCard
                 project={project}
@@ -714,7 +650,7 @@ function ProjectReel({ items }: { items: ProjectCardData[] }) {
         <div
           className={cn(
             'pointer-events-none absolute inset-x-0 bottom-7 z-20 flex flex-col items-center gap-1 transition-all duration-500',
-            isScrollLocked && !hasSeenBothCards ? 'opacity-100' : 'opacity-0',
+            isLocked ? 'opacity-100' : 'opacity-0',
           )}
         >
           <div className="flex items-center gap-1.5">
@@ -723,7 +659,7 @@ function ProjectReel({ items }: { items: ProjectCardData[] }) {
                 key={`${project.number}-dot`}
                 className={cn(
                   'h-1.5 w-1.5 rounded-full transition-all duration-500',
-                  activeCardIndex === index ? 'bg-white' : 'bg-white/30',
+                  activeCard === index ? 'bg-white' : 'bg-white/30',
                 )}
               />
             ))}
@@ -731,7 +667,7 @@ function ProjectReel({ items }: { items: ProjectCardData[] }) {
           <p
             className={cn(
               'text-[10px] text-white/30 transition-all duration-500',
-              activeCardIndex === 0 ? 'opacity-100' : 'opacity-0',
+              activeCard === 0 ? 'opacity-100' : 'opacity-0',
             )}
           >
             scroll to see next project
