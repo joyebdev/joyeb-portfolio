@@ -22,7 +22,7 @@ export function ProjectsVerticalFeed() {
       id="projects"
       className="flex w-full flex-col items-center px-4 py-16 md:py-24"
     >
-      <div className="flex w-full flex-col items-center">
+      <div className="flex w-full max-w-5xl flex-col items-center rounded-3xl border border-white/10 px-4 py-6 sm:px-6 md:py-8">
         <div className="mb-10 flex flex-col items-center gap-1 text-center">
           <p className="text-muted-foreground text-sm">Featured</p>
           <h2 className="text-3xl font-bold md:text-4xl">My Work</h2>
