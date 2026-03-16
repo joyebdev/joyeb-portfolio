@@ -26,7 +26,10 @@ export function ProjectsVerticalFeed({ mode }: { mode: 'homepage' | 'page' }) {
         </div>
 
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 md:gap-6">
-          {visibleProjects.slice(0, 2).map((project, index) => {
+          {(mode === 'homepage'
+            ? visibleProjects.slice(0, 2)
+            : visibleProjects
+          ).map((project, index) => {
             const cardBgColor = index === 0 ? '#1a2018' : '#1a1824';
             const transition =
               index === 0 ? { duration: 0.5 } : { duration: 0.5, delay: 0.15 };
