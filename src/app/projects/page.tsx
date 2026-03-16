@@ -1,4 +1,4 @@
-import { ProjectsVerticalFeed } from '@/components/landing/MasonryProjects';
+import ProjectList from '@/components/projects/ProjectList';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 export default function ProjectsPage() {
   return (
     <main className="relative min-h-screen bg-background text-foreground transition-colors">
-      <ProjectsVerticalFeed mode="page" />
+      <ProjectList />
     </main>
   );
 }
