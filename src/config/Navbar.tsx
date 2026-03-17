@@ -17,7 +17,7 @@ export const navbarConfig = {
     },
     {
       label: 'Blogs',
-      href: '/#blogs',
+      href: '/blog',
     },
     {
       label: 'Contact',

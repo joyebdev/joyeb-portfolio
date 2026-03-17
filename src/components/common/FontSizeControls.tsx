@@ -14,24 +14,21 @@ import {
 } from '../ui/drawer';
 
 export default function FontSizeControls() {
-  const [fontSize, setFontSize] = useState<number>(() => {
-    if (typeof window === 'undefined') {
-      return 16;
-    }
-
-    const savedFontSize = localStorage.getItem('blog-font-size');
-    if (!savedFontSize) {
-      return 16;
-    }
-
-    const parsed = Number.parseInt(savedFontSize, 10);
-    if (Number.isNaN(parsed)) {
-      return 16;
-    }
-
-    return Math.max(12, Math.min(24, parsed));
-  });
+  const [fontSize, setFontSize] = useState<number>(16);
+  const [isMounted, setIsMounted] = useState(false);
   const { triggerHaptic, isMobile } = useHapticFeedback();
+
+  // Load from localStorage on mount
+  useEffect(() => {
+    setIsMounted(true);
+    const savedFontSize = localStorage.getItem('blog-font-size');
+    if (savedFontSize) {
+      const parsed = Number.parseInt(savedFontSize, 10);
+      if (!Number.isNaN(parsed)) {
+        setFontSize(Math.max(12, Math.min(24, parsed)));
+      }
+    }
+  }, []);
 
   // Apply font size to the document
   const applyFontSize = (size: number) => {
@@ -44,8 +41,10 @@ export default function FontSizeControls() {
   };
 
   useEffect(() => {
-    applyFontSize(fontSize);
-  }, [fontSize]);
+    if (isMounted) {
+      applyFontSize(fontSize);
+    }
+  }, [fontSize, isMounted]);
 
   // Save to localStorage and apply
   const updateFontSize = (newSize: number) => {

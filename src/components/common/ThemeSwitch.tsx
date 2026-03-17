@@ -70,13 +70,19 @@ export const useThemeToggle = ({
       }
 
       try {
+        // We use a shorter timeout for the actual DOM update to avoid browser aborts
         const transition = document.startViewTransition(() => {
-          commitTheme();
+          return new Promise((resolve) => {
+            commitTheme();
+            // Force a small delay to ensure React has finished the initial render pass
+            setTimeout(resolve, 0);
+          });
         });
 
         transition.ready?.catch(() => {});
         transition.finished?.catch(() => {});
-      } catch {
+      } catch (error) {
+        console.warn('View Transition failed, falling back to standard update', error);
         commitTheme();
       }
     },

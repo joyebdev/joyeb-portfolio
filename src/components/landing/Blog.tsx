@@ -311,6 +311,16 @@ export default function Blog({ posts }: BlogProps) {
           );
         })}
       </div>
+
+      <div className="mt-8 flex justify-center">
+        <Link
+          href="/blog"
+          className="text-muted-foreground flex items-center gap-1 text-sm transition-colors hover:text-black dark:hover:text-white"
+        >
+          View All Blogs
+          <span aria-hidden="true">→</span>
+        </Link>
+      </div>
     </section>
   );
 }

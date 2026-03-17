@@ -114,24 +114,6 @@ export function generateMetadata(pathname: string) {
     metadataBase: new URL(siteConfig.url),
     title: pageMeta.title,
     description: pageMeta.description,
-    icons: {
-      icon: [
-        {
-          url: '/favicon-light.png?v=3',
-          media: '(prefers-color-scheme: light)',
-          type: 'image/png',
-          sizes: '256x256',
-        },
-        {
-          url: '/favicon-dark.png?v=3',
-          media: '(prefers-color-scheme: dark)',
-          type: 'image/png',
-          sizes: '256x256',
-        },
-      ],
-      shortcut: '/favicon-dark.png',
-      apple: '/favicon-dark.png',
-    },
     keywords: pageMeta.keywords?.join(', '),
     authors: [{ name: siteConfig.author.name }],
     creator: siteConfig.author.name,

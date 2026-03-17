@@ -29,6 +29,9 @@ export default function RootLayout({
   return (
     <ViewTransitions>
       <html lang="en" suppressHydrationWarning>
+        <head>
+          <link rel="icon" href="/favicon-light.png?v=3" sizes="any" />
+        </head>
         <body className={`font-hanken-grotesk overflow-x-hidden antialiased`}>
           <ThemeProvider
             attribute="class"
