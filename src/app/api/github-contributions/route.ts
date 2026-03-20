@@ -21,10 +21,7 @@ type DenoContribution = {
   level?: number;
 };
 
-const LEGACY_FALLBACK_USERNAME = 'joyebdev';
-const USERNAME_CANDIDATES = Array.from(
-  new Set([GITHUB_USERNAME, LEGACY_FALLBACK_USERNAME]),
-);
+const USERNAME_CANDIDATES = [GITHUB_USERNAME];
 const FETCH_TIMEOUT_MS = 3500;
 const GRID_CELL_COUNT = 52 * 7;
 
