@@ -21,9 +21,10 @@ type DenoContribution = {
   level?: number;
 };
 
-const PRIMARY_URL = `${githubConfig.apiUrl}/${GITHUB_USERNAME}`;
-const FALLBACK_URL =
-  `https://github.com/users/${GITHUB_USERNAME}/contributions`;
+const LEGACY_FALLBACK_USERNAME = 'joyebdev';
+const USERNAME_CANDIDATES = Array.from(
+  new Set([GITHUB_USERNAME, LEGACY_FALLBACK_USERNAME]),
+);
 const FETCH_TIMEOUT_MS = 3500;
 const GRID_CELL_COUNT = 52 * 7;
 
@@ -230,8 +231,9 @@ function createEmptyPayload(): ContributionPayload {
   };
 }
 
-async function getPrimaryPayload(): Promise<ContributionPayload | null> {
-  const primaryResponse = await safeFetch(PRIMARY_URL);
+async function getPrimaryPayload(username: string): Promise<ContributionPayload | null> {
+  const primaryUrl = `${githubConfig.apiUrl}/${username}`;
+  const primaryResponse = await safeFetch(primaryUrl);
 
   if (primaryResponse?.ok) {
     const primaryText = await primaryResponse.text();
@@ -246,7 +248,7 @@ async function getPrimaryPayload(): Promise<ContributionPayload | null> {
     }
   }
 
-  const jsonResponse = await safeFetch(`${PRIMARY_URL}.json`);
+  const jsonResponse = await safeFetch(`${primaryUrl}.json`);
 
   if (!jsonResponse?.ok) {
     return null;
@@ -256,12 +258,13 @@ async function getPrimaryPayload(): Promise<ContributionPayload | null> {
   return normalizeDenoPayload(payload);
 }
 
-async function getFallbackPayload(): Promise<ContributionPayload | null> {
-  const response = await safeFetch(FALLBACK_URL, {
+async function getFallbackPayload(username: string): Promise<ContributionPayload | null> {
+  const fallbackUrl = `https://github.com/users/${username}/contributions`;
+  const response = await safeFetch(fallbackUrl, {
     ...REVALIDATE_OPTIONS,
     headers: {
       Accept: 'text/html',
-      'User-Agent': 'joyeb-portfolio/1.0',
+      'User-Agent': 'devxziki-portfolio/1.0',
     },
   });
 
@@ -275,14 +278,16 @@ async function getFallbackPayload(): Promise<ContributionPayload | null> {
 
 export async function GET() {
   try {
-    const primaryPayload = await getPrimaryPayload();
-    if (primaryPayload) {
-      return Response.json(primaryPayload);
-    }
+    for (const username of USERNAME_CANDIDATES) {
+      const primaryPayload = await getPrimaryPayload(username);
+      if (primaryPayload) {
+        return Response.json(primaryPayload);
+      }
 
-    const fallbackPayload = await getFallbackPayload();
-    if (fallbackPayload) {
-      return Response.json(fallbackPayload);
+      const fallbackPayload = await getFallbackPayload(username);
+      if (fallbackPayload) {
+        return Response.json(fallbackPayload);
+      }
     }
 
     return Response.json(createEmptyPayload());
