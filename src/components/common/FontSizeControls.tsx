@@ -2,7 +2,7 @@
 
 import { useHapticFeedback } from '@/hooks/use-haptic-feedback';
 import { Minus, Plus, Settings } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 
 import { Button } from '../ui/button';
 import {
@@ -15,12 +15,10 @@ import {
 
 export default function FontSizeControls() {
   const [fontSize, setFontSize] = useState<number>(16);
-  const [isMounted, setIsMounted] = useState(false);
   const { triggerHaptic, isMobile } = useHapticFeedback();
 
-  // Load from localStorage on mount
-  useEffect(() => {
-    setIsMounted(true);
+  // Load from localStorage on mount (synchronously before paint)
+  useLayoutEffect(() => {
     const savedFontSize = localStorage.getItem('blog-font-size');
     if (savedFontSize) {
       const parsed = Number.parseInt(savedFontSize, 10);
@@ -40,11 +38,9 @@ export default function FontSizeControls() {
     }
   };
 
-  useEffect(() => {
-    if (isMounted) {
-      applyFontSize(fontSize);
-    }
-  }, [fontSize, isMounted]);
+  useLayoutEffect(() => {
+    applyFontSize(fontSize);
+  }, [fontSize]);
 
   // Save to localStorage and apply
   const updateFontSize = (newSize: number) => {
