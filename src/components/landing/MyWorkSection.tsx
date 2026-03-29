@@ -13,10 +13,7 @@ export default function MyWorkSection() {
       <div className="mx-auto mt-8 w-full max-w-6xl">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {projects.map((project) => (
-            <ProjectCard
-              key={project.title}
-              project={project}
-            />
+            <ProjectCard key={project.slug} project={project} />
           ))}
         </div>
       </div>

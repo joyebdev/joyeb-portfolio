@@ -1,15 +1,21 @@
+import type { ReactNode } from 'react';
+
 export interface Project {
   title: string;
+  slug: string;
   description: string;
+  fullDescription: string;
+  features: string[];
+  techStack: string[];
+  challenges?: string;
+  solutions?: string;
   image: string;
   video?: string;
   link: string;
-  technologies: { name: string; icon: React.ReactNode }[];
+  technologies: { name: string; icon: ReactNode }[];
   github?: string;
   live: string;
-  details: boolean;
-  projectDetailsPageSlug: string;
-  isWorking: boolean;
+  theme?: 'green' | 'blue' | 'purple' | 'orange' | 'neutral';
 }
 
 export interface ProjectCaseStudyFrontmatter {
